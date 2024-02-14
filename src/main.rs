@@ -20,16 +20,15 @@ fn main() -> Result<(), PossibleErrors> {
     let font = Font::try_from_vec(font).unwrap();
     let mut font_bundle = FontBundle::new(&font, Scale { x: 40., y: 40. });
     //draw on image
-    text_on_image(
+    text_on_image_draw_debug(
         &mut background,
-        "This is Line 1
-        This is Line 2
-        This is a Line with more content.",
+        "This is Line 1",
         &font_bundle,
         400,
-        0,
-        HorizontalJustify::Center,
-        WrapBehavior::NoWrap,
+        800,
+        TextJustify::Left,
+        VerticalAnchor::Top,
+        WrapBehavior::Wrap(100),
     );
     //save image
     background
