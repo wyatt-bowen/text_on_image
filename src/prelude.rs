@@ -48,7 +48,6 @@ impl WrapBehavior {
     }
 }
 
-//#[derive(Display)]
 pub struct FontBundle<'a> {
     font: &'a Font<'a>,
     scale: Scale,
@@ -66,15 +65,21 @@ impl<'a> Display for FontBundle<'_> {
 }
 
 impl<'a> FontBundle<'a> {
-    pub fn new(font_: &'a Font<'a>, scale_: Scale) -> Self {
+    pub fn new(font_: &'a Font<'a>, scale_: Scale, color_: Rgba<u8>) -> Self {
+        if scale_.x <= 0. || scale_.y <= 0. {
+            panic!("text_on_image: FontBundle scale.x or scale.y cannot be <= 0.0!");
+        }
         FontBundle {
             font: font_,
             scale: scale_,
-            color: Rgba([0, 0, 0, 255]),
+            color: color_,
         }
     }
 
     pub fn set_scale(&mut self, scale_: Scale) {
+        if scale_.x <= 0. || scale_.y <= 0. {
+            panic!("text_on_image: FontBundle scale.x or scale.y cannot be <= 0.0!");
+        }
         self.scale = scale_;
     }
 
@@ -110,7 +115,6 @@ pub fn text_on_image<T: AsRef<str>>(
             }
             let mut lines_altered: Vec<String> = vec![];
             for &line in &lines {
-                //let mut current_width: u32 = 0;
                 let mut buffer: String = String::new();
                 for word in line.split_whitespace() {
                     if cfg!(debug_assertions) {
@@ -129,7 +133,6 @@ pub fn text_on_image<T: AsRef<str>>(
                     if get_text_width(font_bundle, buffer.clone() + " " + word)
                         <= max_width + optional_space_width
                     {
-                        //TODO: fix the comparisons so that an extra space is not added before the first word
                         //Add word to line
                         if cfg!(debug_assertions) {
                             println!("Word {} gets added to line", word);
@@ -201,11 +204,9 @@ fn get_text_width<T: AsRef<str>>(font_bundle: &FontBundle, text: T) -> u32 {
         .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
         .last()
         .unwrap_or(0.) as u32
-    //todo!()
 }
 
 fn get_text_height(font_bundle: &FontBundle) -> i32 {
-    //probably don't need text parameter
     let v_metrics = font_bundle.font.v_metrics(font_bundle.scale);
     (v_metrics.ascent - v_metrics.descent + v_metrics.line_gap) as i32
 }
