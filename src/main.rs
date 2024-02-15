@@ -22,13 +22,14 @@ fn main() -> Result<(), PossibleErrors> {
     //draw on image
     text_on_image_draw_debug(
         &mut background,
-        "This is Line 1",
+        "This is Line 1
+        Thisislinewithextralong 2",
         &font_bundle,
         400,
         800,
-        TextJustify::Left,
-        VerticalAnchor::Top,
-        WrapBehavior::Wrap(100),
+        TextJustify::Center,
+        VerticalAnchor::Center,
+        WrapBehavior::Wrap(250),
     );
     //save image
     background

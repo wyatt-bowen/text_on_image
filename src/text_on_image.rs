@@ -36,14 +36,15 @@ pub enum WrapBehavior {
     NoWrap,
     Wrap(u32),
 }
+
 impl Default for WrapBehavior {
     fn default() -> Self {
         WrapBehavior::NoWrap
     }
 }
 impl WrapBehavior {
-    pub fn new(width_before_newline: u32) -> Self {
-        WrapBehavior::Wrap(width_before_newline)
+    pub fn new(max_width: u32) -> Self {
+        WrapBehavior::Wrap(max_width)
     }
 }
 
@@ -97,27 +98,84 @@ pub fn text_on_image<T: AsRef<str>>(
             horizontal_justify,
             vertical_anchor,
         ),
-        WrapBehavior::Wrap(width_before_newline) => {
+        WrapBehavior::Wrap(max_width) => {
+            if max_width < get_text_width(font_bundle, "mm") {
+                panic!("text_on_image: Cannot set max_width for wrapping below 2 ems! Try setting max_width to at least {}", get_text_width(font_bundle, "mm"));
+            }
             let mut lines_altered: Vec<String> = vec![];
             for &line in &lines {
-                let mut current_width: u32 = 0;
+                //let mut current_width: u32 = 0;
                 let mut buffer: String = String::new();
                 for word in line.split_whitespace() {
-                    if buffer.is_empty() {
-                        buffer = buffer + word;
-                    } else {
-                        buffer = buffer + " " + word;
+                    if cfg!(debug_assertions) {
+                        println!(
+                            "\"{}\" has width {}. Compare to max_width {}",
+                            buffer.clone() + " " + word,
+                            get_text_width(font_bundle, buffer.clone() + " " + word),
+                            max_width
+                        );
                     }
-                    current_width += get_text_width(font_bundle, word);
-                    if current_width > width_before_newline {
+                    let optional_space_width: u32 = if buffer.is_empty() {
+                        get_text_width(font_bundle, " ")
+                    } else {
+                        0
+                    };
+                    if get_text_width(font_bundle, buffer.clone() + " " + word)
+                        <= max_width + optional_space_width
+                    {
+                        //TODO: fix the comparisons so that an extra space is not added before the first word
+                        //Add word to line
+                        if cfg!(debug_assertions) {
+                            println!("Word {} gets added to line", word);
+                        }
+                        if buffer.is_empty() {
+                            buffer = buffer + word;
+                        } else {
+                            buffer = buffer + " " + word;
+                        }
+                    } else if get_text_width(font_bundle, buffer.clone() + " " + word) > max_width
+                        && buffer.is_empty()
+                    {
+                        //add partial word with a dash at the end
+                        let mut word_chars = word.chars();
+                        while let Some(word_char) = word_chars.next() {
+                            if get_text_width(font_bundle, buffer.clone() + "-") <= max_width {
+                                buffer = buffer + &word_char.to_string();
+                            } else {
+                                buffer = buffer + "-";
+                                lines_altered.push(buffer);
+                                buffer = String::new();
+                                buffer = buffer + &word_char.to_string();
+                            }
+                        }
+                    } else if get_text_width(font_bundle, buffer.clone() + " " + word) > max_width
+                        && !buffer.is_empty()
+                    {
+                        if cfg!(debug_assertions) {
+                            println!("Word {} goes over max width && buffer is not empty.", word);
+                        }
+                        //write buffer to lines_altered, empty buffer, evaluate as new line
                         lines_altered.push(buffer);
                         buffer = String::new();
-                        current_width = 0;
+                        let mut word_chars = word.chars();
+                        while let Some(word_char) = word_chars.next() {
+                            if get_text_width(font_bundle, buffer.clone() + "-") <= max_width {
+                                buffer = buffer + &word_char.to_string();
+                            } else {
+                                buffer = buffer + "-";
+                                lines_altered.push(buffer);
+                                buffer = String::new();
+                            }
+                        }
                     }
                 }
+                lines_altered.push(buffer);
+                buffer = String::new();
             }
             let lines_altered: Vec<&str> = lines_altered.iter().map(|line| line.as_str()).collect();
-            println!("Lines altered:\n{:?}", lines_altered);
+            if cfg!(debug_assertions) {
+                println!("Lines altered:\n{:?}", lines_altered);
+            }
             position_and_draw(
                 image,
                 lines_altered,
@@ -131,10 +189,10 @@ pub fn text_on_image<T: AsRef<str>>(
     }
 }
 
-fn get_text_width(font_bundle: &FontBundle, text: &str) -> u32 {
+fn get_text_width<T: AsRef<str>>(font_bundle: &FontBundle, text: T) -> u32 {
     font_bundle
         .font
-        .layout(text, font_bundle.scale, point(0., 0.))
+        .layout(text.as_ref(), font_bundle.scale, point(0., 0.))
         .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
         .last()
         .unwrap_or(0.) as u32
@@ -215,7 +273,9 @@ fn position_and_draw(
             font_bundle.font,
             line,
         );
-        println!("pixels_from_left for line {}: {}", line, pixels_from_left);
+        if cfg!(debug_assertions) {
+            println!("pixels_from_left for line {}: {}", line, pixels_from_left);
+        }
         current_line += 1;
     }
 }
