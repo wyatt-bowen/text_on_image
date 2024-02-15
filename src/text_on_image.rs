@@ -1,4 +1,4 @@
-use std::{fmt::Display, io::BufRead};
+use std::fmt::Display;
 
 use image::{DynamicImage, ImageError, Rgba};
 use imageproc::drawing::draw_text_mut;
@@ -170,7 +170,6 @@ pub fn text_on_image<T: AsRef<str>>(
                     }
                 }
                 lines_altered.push(buffer);
-                buffer = String::new();
             }
             let lines_altered: Vec<&str> = lines_altered.iter().map(|line| line.as_str()).collect();
             if cfg!(debug_assertions) {
@@ -244,7 +243,7 @@ fn position_and_draw(
 ) {
     let lines_len = lines.len() as i32;
     let mut current_line = 0;
-    for (&line) in &lines {
+    for &line in &lines {
         if cfg!(debug_assertions) {
             println!("{} width: {}", line, get_text_width(font_bundle, line));
         }
