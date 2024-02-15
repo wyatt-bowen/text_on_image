@@ -28,7 +28,7 @@ pub enum VerticalAnchor {
 }
 impl Default for VerticalAnchor {
     fn default() -> Self {
-        VerticalAnchor::Top
+        VerticalAnchor::Center
     }
 }
 
@@ -52,6 +52,7 @@ impl WrapBehavior {
 pub struct FontBundle<'a> {
     font: &'a Font<'a>,
     scale: Scale,
+    color: Rgba<u8>,
 }
 
 impl<'a> Display for FontBundle<'_> {
@@ -69,11 +70,16 @@ impl<'a> FontBundle<'a> {
         FontBundle {
             font: font_,
             scale: scale_,
+            color: Rgba([0, 0, 0, 255]),
         }
     }
 
     pub fn set_scale(&mut self, scale_: Scale) {
         self.scale = scale_;
+    }
+
+    pub fn set_color(&mut self, color_: Rgba<u8>) {
+        self.color = color_;
     }
 }
 
@@ -265,7 +271,7 @@ fn position_and_draw(
         };
         draw_text_mut(
             image,
-            Rgba([0, 0, 0, 255]),
+            font_bundle.color,
             pixels_from_left - horizontal_offset as i32,
             pixels_from_top + vertical_offset,
             font_bundle.scale,
