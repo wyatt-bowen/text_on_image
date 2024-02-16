@@ -11,7 +11,3 @@ If you are looking to place multiple lines of text on an image that are spatiall
 - Text justification: Left, Center, Right
 - Vertical anchor: Top, Center, Bottom
 - Text wrapping: Choose a max length in pixels, and your text will wrap to a new line, respecting your choices for text justification and vertical anchoring.
-
-## Example Images
-
-<img src = "./path", alt="">
