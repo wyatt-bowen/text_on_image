@@ -5,8 +5,10 @@ authors = ["Wyatt Bowen"]
 edition = "2021"
 
 readme = "README.md"
-# repository = ""
-# homepage = ""
+repository = "https://github.com/wyatt-bowen/text_on_image"
+homepage = "https://github.com/wyatt-bowen/text_on_image"
+
+keywords = ["image","text","imageproc"]
 
 
 

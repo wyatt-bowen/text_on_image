@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::*;
 use image::{ImageError, Rgba};
 use rusttype::{Font, Scale};
 
