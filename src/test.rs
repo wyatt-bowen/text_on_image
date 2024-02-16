@@ -22,7 +22,7 @@ fn test_example_text() -> Result<(), PossibleErrors> {
     text_on_image_draw_debug(
         &mut background,
         "This is Line 1
-        Thisislinewithextralong 2",
+        Thisislinewithextralongtextthatneedsto wrap 2",
         &font_bundle,
         400,
         800,
