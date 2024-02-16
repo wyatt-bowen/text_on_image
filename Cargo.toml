@@ -5,6 +5,8 @@ authors = ["Wyatt Bowen"]
 edition = "2021"
 
 readme = "README.md"
+description = "An easier way to place text on images."
+license = "Apache-2.0"
 repository = "https://github.com/wyatt-bowen/text_on_image"
 homepage = "https://github.com/wyatt-bowen/text_on_image"
 
